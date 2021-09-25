@@ -30,16 +30,15 @@ connection.once('open', () => {
 
 // Import and user routes
 const userRoutes = require('./src/controllers/user.controller')
-const userRoutes = require('./src/templates.login.html')
+
 
 // Set route path on project
 app.get('/', async (req, res) => {
-  res.status(200).json("./src/templates.login.html")
+  res.status(200).json("./src/templates/login.html")
 })
 
 app.use('/users', userRoutes)
 
-app.use('/tempplate', userhtml) 
 
 app.listen(PORT, ()=>{
     console.log(`Successfully served on port: ${PORT}.`);
