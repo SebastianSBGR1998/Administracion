@@ -33,7 +33,7 @@ const userRoutes = require('./src/controllers/user.controller')
 
 // Set route path on project
 app.get('/', async (req, res) => {
-  res.status(200).json("App is run!")
+  res.status(200).json("./src/templates.login.html")
 })
 
 app.use('/users', userRoutes)
