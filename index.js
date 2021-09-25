@@ -1,102 +1,48 @@
+// establish an express app
+const express = require('express')
+const app = express()
 
-/* no es necesario poner la extension del archivo frutas siempre
-y cuando sea un archivo .js
-require importa del archivo frutas que esta en al mismo nivel
-en la gerarquia de app.js 
+// allow requests from outside resources like postman, or your frontend if you choose to build that out
+const cors = require('cors')
+app.use(cors())
 
-const frutas = require("./frutas");
+// app will serve and receive data in a JSON format
+app.use(express.json())
 
+// the messenger between our app and our database
+const mongoose = require('mongoose')
 
-// para llamar mas de 1 constante usamos:
+// allow us to hide our connection secret in the process.env object
+require('dotenv').config()
 
-const {frutas, dinero} = require("./frutas");
+const source = process.env.ATLAS_CONNECTION
+const PORT = process.env.PORT || 5000
 
-// llamamos al cowsay
-
-const cowsay = require("cowsay");
-
-console.log(cowsay.say({
-    text: "I'm a mikaaaaa",
-    e: "oO",
-    T: "U "
-}));
-
-frutas.forEach((fruta) => {
-    console.log(fruta);
-});
-
-console.log("El dinero del mercado es: " + dinero);
-
-
-// aqui empieza la creacion de un servidor usando http
-
-const http = require('http');
-const server = http.createServer((req, res) => {
-    res.end('estoy respondiendo a tu solicitud version 2');
-
-});
-
-const puerto = 3000;
-server.listen(puerto, () => {
-    console.log('escuchando solicitudes');
-});
-
-// cada vez que se haga un cambio hay que reiniciar el servidor
-*/
-
-// aqui empieza la creacion de un servidor usando express:
-
-const express = require('express');
-const app = express();
-
-const port = 3000;
-
-//conexion base de datos
-const mongoose = require('mongoose');
-
-const user = 'dataBase_Conection';
-const password = '5uDSYjMUGRHoH4CD';
-const dbname = 'proyectDB';
-const uri = `mongodb+srv://${user}:${password}@cluster0.x7dka.mongodb.net/${dbname}?retryWrites=true&w=majority`;
-
-mongoose.connect(uri,
-    { useNewUrlParser: true, useUnifiedTopology: true}
-)
-    .then(() => console.log('Base de datos conectada'))
-    .catch(e => console.log(e))
-
-// motor de plantillas
-app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
-
-// al ponerla primero, accede primero a esta ruta
-app.use(express.static(__dirname + "/public"));
-
-// esta es la nueva ruta de web
-// rutasweb
-app.use('/', require('./router/RutasWeb'));
-app.use('/students', require('./router/Students'));
-
-/*
-// antes de router este estaba funcionando
-app.get('/', (req,res) => {
-    res.render("index", {titulo : "mi titulo dinamico"})
+// establish connection & give yourself a message so you know when its complete
+mongoose.connect(source, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+const connection = mongoose.connection
+connection.once('open', () => {
+  console.log("DB connected");
 })
 
-// app.get('/', (req, res) => {
-//     res.send('Mi respuesta desde express')
-// })
+// Import and user routes
+const userRoutes = require('./src/controllers/user.controller')
 
-// antes de router este estaba funcionando
-app.get('/servicios', (req, res) => {
-    res.send('Saludos desde servicios')
-})
-*/
 
-app.use((req, res, next) => {
-    res.status(404).sendFile(__dirname + "/public/404.html");
+
+// Set route path on project
+app.get('/', async (req, res) => {
+  res.status(200).json("./src/templates/login.html")
 })
 
-app.listen(port, () => {
-    console.log('servidor a su servicio en el puerto', port);
+app.use('/users', userRoutes)
+
+
+
+
+app.listen(PORT, ()=>{
+    console.log(`Successfully served on port: ${PORT}.`);
 })
